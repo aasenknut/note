@@ -1,0 +1,14 @@
+{{define "title"}}Note {{.Note.ID}}{{end}}
+{{define "main"}} 
+    {{with .Note}}
+    <div class="note">
+        <div class="metadata">
+            <strong>{{.Title}}</strong>
+            <span>{{.ID}}</span>
+        </div>
+        <pre>
+            {{.Text}}
+        </pre>
+    </div>
+    {{end}}
+{{end}}

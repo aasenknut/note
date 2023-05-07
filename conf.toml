@@ -1,0 +1,5 @@
+[http]
+addr = ":8008"
+
+[db]
+dsn = "./note.db"

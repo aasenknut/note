@@ -1,0 +1,16 @@
+{{define "title"}}Insert your words{{end}}
+{{define "main"}}
+<form action='/note/create' method='POST'>
+    <div>
+        <label>Title:</label>
+        <input type='text' name='title' value='{{.Note.Title}}'>
+    </div>
+    <div>
+        <label>Content:</label>
+        <textarea name='text' value='{{.Note.Text}}'> </textarea>
+    </div>
+    <div>
+        <input type='submit' value='Publish my words'>
+    </div>
+</form>
+{{end}}
