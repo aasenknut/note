@@ -1,21 +1,12 @@
 {{define "title"}}Home{{end}}
 {{define "main"}}
-    <h2>Latest notes</h2>
+    <h2>💭 A stream of consciousness...</h2>
     {{if .Notes}}
-    <table>
-        <tr>
-            <th>ID</th>
-            <th>Title</th>
-            <th>Note</th>
-        </tr>
+    <article>
         {{range .Notes}}
-            <tr>
-                <td>{{.ID}}</td>
-                <td>{{.Title}}</td>
-                <td>{{.Text}}</td>
-            </tr>
+            <p>{{.Text}}</p>
         {{end}}
-    </table>
+    </article>
     {{else}}
         <p>There's nothing to see here...</p>
     {{end}}
