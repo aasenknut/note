@@ -3,11 +3,13 @@ package note
 import "context"
 
 type User struct {
-	Name string `json:"name"`
-	ID   int    `json:"id"`
+	ID       int    `json:"id"`
+	Username string `json:"username"`
+	Password string `json:"password"`
 }
 
 type UserService interface {
-	GetByName(ctx context.Context, id int) (*User, error)
+	Create(ctx context.Context, username, password string) (int, error)
+	GetByUsername(ctx context.Context, id int) (*User, error)
 	GetByID(ctx context.Context, id int) (*User, error)
 }

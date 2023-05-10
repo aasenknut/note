@@ -2,11 +2,15 @@
 {{define "main"}}
     <h2>💭 A stream of consciousness...</h2>
     {{if .Notes}}
-    <article>
+    <blockquote>
         {{range .Notes}}
-            <p>{{.Text}}</p>
+            <p>{{.Text}}
+            <br>
+            <cite>user</cite>
+            </p>
+            <hr>
         {{end}}
-    </article>
+    </blockquote>
     {{else}}
         <p>There's nothing to see here...</p>
     {{end}}

@@ -1,6 +1,7 @@
 package http
 
 import (
+	"bytes"
 	"fmt"
 	"html/template"
 	"io/fs"
@@ -21,6 +22,8 @@ type Server struct {
 
 	Addr        string
 	NoteService note.NoteService
+	UserService note.UserService
+	AuthService note.AuthService
 	TmplCache   map[string]*template.Template
 }
 
@@ -38,6 +41,7 @@ func NewServer() *Server {
 
 	s.registerHealthRoute()
 	s.registerNoteRoutes()
+	s.registerUserRoutes()
 	return s
 }
 
@@ -93,6 +97,30 @@ func (s *Server) SetTmplCache() error {
 	}
 
 	s.TmplCache = cache
+
+	return nil
+}
+
+type pageData struct {
+	Note          *note.Note
+	Notes         []*note.Note
+	Authenticated bool
+}
+
+func (s *Server) render(w http.ResponseWriter, page string, data pageData) error {
+	ts, ok := s.TmplCache[page]
+	if !ok {
+		return fmt.Errorf("no page: %s", page)
+	}
+
+	buf := new(bytes.Buffer)
+
+	if err := ts.ExecuteTemplate(buf, "index", data); err != nil {
+		return fmt.Errorf("render template: %v", err)
+	}
+
+	w.WriteHeader(http.StatusOK)
+	buf.WriteTo(w)
 
 	return nil
 }

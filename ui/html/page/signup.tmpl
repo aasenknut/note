@@ -1,0 +1,16 @@
+{{define "title"}}🏄 Create yourself a userprofile.{{end}}
+{{define "main"}}
+    <form action="/user/create" method="POST">
+        <div>
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username">
+        </div>
+        <div>
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" minlength="8" required>
+        </div>
+        <div>
+            <input type="submit" value="Sign in">
+        </div>
+    </form>
+{{end}}

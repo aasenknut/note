@@ -14,4 +14,19 @@ INSERT INTO note (title, text) VALUES ("2nd", "Second note written.");
 INSERT INTO note (title, text) VALUES ("Short", "Shortest.");
 INSERT INTO note (title, text) VALUES ("Today", "Today I did alot of work. It was fun. Looking forward to tomorrow. Tomorrow will be fun too.");
 
+CREATE TABLE user (
+    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    username TEXT UNIQUE NOT NULL,
+    created DATETIME NOT NULL DEFAULT (DATETIME(CURRENT_TIMESTAMP, 'localtime'))
+);
+
+INSERT INTO user (username) VALUES ("user");
+
+CREATE TABLE auth (
+    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    user_id TEXT NOT NULL,
+    password TEXT NOT NULL,
+    created DATETIME NOT NULL DEFAULT (DATETIME(CURRENT_TIMESTAMP, 'localtime'))
+);
+
 COMMIT;

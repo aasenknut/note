@@ -6,14 +6,17 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/sqlite"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	_ "github.com/mattn/go-sqlite3"
 )
 
+const migrationPath string = "./sqlite/migration"
+
 type DB struct {
-	DSN    string
-	db     *sql.DB
-	ctx    context.Context
-	cancel func()
+	DSN string
+	db  *sql.DB
 }
 
 func NewDB() *DB {
@@ -32,8 +35,6 @@ func (db *DB) Open() error {
 	if _, err := db.db.Exec(`PRAGMA foreign_keys = ON;`); err != nil {
 		return fmt.Errorf("foreign keys pragma: %w", err)
 	}
-
-	db.ctx, db.cancel = context.WithCancel(context.Background())
 	return nil
 }
 
@@ -52,9 +53,23 @@ func (db *DB) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) {
 }
 
 func (db *DB) Close() error {
-	db.cancel()
 	if db.db != nil {
 		return db.db.Close()
+	}
+	return nil
+}
+
+func (db *DB) Migrate() error {
+	driver, err := sqlite.WithInstance(db.db, &sqlite.Config{})
+	if err != nil {
+		return fmt.Errorf("migrate instance: %v", err)
+	}
+	m, err := migrate.NewWithDatabaseInstance(fmt.Sprintf("file://%s", migrationPath), "sqlite3", driver)
+	if err != nil {
+		return fmt.Errorf("migrate setup: %v", err)
+	}
+	if err := m.Up(); err != nil {
+		return fmt.Errorf("up migration: %v", err)
 	}
 	return nil
 }

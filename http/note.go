@@ -1,8 +1,6 @@
 package http
 
 import (
-	"bytes"
-	"context"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -12,11 +10,6 @@ import (
 
 	"github.com/aasenknut/note"
 )
-
-type pageData struct {
-	Note  *note.Note
-	Notes []*note.Note
-}
 
 const homeRoute = "/home"
 const noteRoute = "/note/"
@@ -80,7 +73,7 @@ func (s *Server) handleNoteCreate(w http.ResponseWriter, r *http.Request) {
 			Text:  r.FormValue("text"),
 		}
 		log.Printf("attempting to insert note: %+v", nt)
-		insertedNote, err := s.NoteService.CreateNote(context.Background(), nt)
+		insertedNote, err := s.NoteService.CreateNote(r.Context(), nt)
 		log.Printf("insirted note: %+v", insertedNote)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -119,22 +112,4 @@ func convertID(s string) (int, error) {
 		return 0, fmt.Errorf("can not convert ID to int")
 	}
 	return id, nil
-}
-
-func (s *Server) render(w http.ResponseWriter, page string, data pageData) error {
-	ts, ok := s.TmplCache[page]
-	if !ok {
-		return fmt.Errorf("no page: %s", page)
-	}
-
-	buf := new(bytes.Buffer)
-
-	if err := ts.ExecuteTemplate(buf, "index", data); err != nil {
-		return fmt.Errorf("render template: %v", err)
-	}
-
-	w.WriteHeader(http.StatusOK)
-	buf.WriteTo(w)
-
-	return nil
 }
