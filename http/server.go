@@ -25,6 +25,9 @@ type Server struct {
 	UserService note.UserService
 	AuthService note.AuthService
 	TmplCache   map[string]*template.Template
+
+	AdminUser     string
+	AdminPassword string
 }
 
 func NewServer() *Server {
@@ -39,6 +42,7 @@ func NewServer() *Server {
 	// Assets: .js, .css,...// Assets: .js, .css,...
 	s.registerAssets()
 
+	s.registerAdminRoutes()
 	s.registerHealthRoute()
 	s.registerNoteRoutes()
 	s.registerUserRoutes()

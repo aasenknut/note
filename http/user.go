@@ -3,6 +3,8 @@ package http
 import (
 	"crypto/rand"
 	"encoding/base64"
+	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -72,6 +74,60 @@ func (s *Server) signup(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (s *Server) signIn(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodPost:
+		if err := r.ParseForm(); err != nil {
+			log.Printf("sign in decode: %v", err)
+			status := http.StatusBadRequest
+			http.Error(w, http.StatusText(status), status)
+		}
+		username := r.FormValue("username")
+		pw := r.FormValue("password")
+		user, err := s.UserService.GetByUsername(r.Context(), username)
+		if err != nil {
+			status := http.StatusInternalServerError
+			http.Error(w, http.StatusText(status), status)
+			LogError(r, err)
+			return
+		}
+		authenticated, err := correctPassword(user.Password, pw)
+		if err != nil {
+			LogError(r, fmt.Errorf("", err))
+		}
+		if !authenticated {
+			http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		}
+		token, err := generateToken()
+		if err != nil {
+			status := http.StatusInternalServerError
+			http.Error(w, http.StatusText(status), status)
+			LogError(r, err)
+			return
+		}
+		ttl, err := s.AuthService.SetAuth(r.Context(), token, userID)
+		if err != nil {
+			status := http.StatusInternalServerError
+			http.Error(w, http.StatusText(status), status)
+			LogError(r, err)
+			return
+		}
+		cookie := &http.Cookie{
+			Name:    "session",
+			Value:   token,
+			Expires: time.Now().Add(ttl).UTC(),
+		}
+		http.SetCookie(w, cookie)
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+	case http.MethodGet:
+		if err := s.render(w, "signup.tmpl", pageData{}); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			LogError(r, err)
+			return
+		}
+	}
+}
+
 func generateToken() (string, error) {
 	b := make([]byte, 32)
 	_, err := rand.Read(b)
@@ -79,4 +135,16 @@ func generateToken() (string, error) {
 		return "", err
 	}
 	return base64.RawURLEncoding.EncodeToString(b), nil
+}
+
+func correctPassword(hashedPassword []byte, plainPassword string) (bool, error) {
+	err := bcrypt.CompareHashAndPassword(hashedPassword, []byte(plainPassword))
+	if err != nil {
+		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
+			return false, fmt.Errorf("mismatch, password, hashed password: %v", err)
+		} else {
+			return false, err
+		}
+	}
+	return true, nil
 }
