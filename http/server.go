@@ -46,6 +46,7 @@ func NewServer() *Server {
 	s.registerHealthRoute()
 	s.registerNoteRoutes()
 	s.registerUserRoutes()
+	s.registerMiddleware()
 	return s
 }
 
