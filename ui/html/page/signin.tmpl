@@ -1,6 +1,6 @@
-{{define "title"}}🏄 Make yourself a userprofile{{end}}
+{{define "title"}}🏄 Sign in{{end}}
 {{define "main"}}
-    <form action="/user/create" method="POST">
+    <form action="/user/signin" method="POST">
         <div>
             <label for="username">Username</label>
             <input type="text" id="username" name="username">
@@ -10,7 +10,7 @@
             <input type="password" id="password" name="password" minlength="8" required>
         </div>
         <div>
-            <input type="submit" value="Sign up">
+            <input type="submit" value="Sign in">
         </div>
     </form>
 {{end}}

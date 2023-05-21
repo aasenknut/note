@@ -12,15 +12,17 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-const createUser string = "/user/create"
+const signUpUser string = "/user/signup"
+const signInUser string = "/user/signin"
 
 const tokenLifetime time.Duration = 24 * time.Hour
 
 func (s *Server) registerUserRoutes() {
-	s.router.HandleFunc(createUser, s.signup)
+	s.router.HandleFunc(signUpUser, s.signUp)
+	s.router.HandleFunc(signInUser, s.signIn)
 }
 
-func (s *Server) signup(w http.ResponseWriter, r *http.Request) {
+func (s *Server) signUp(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
 		if err := r.ParseForm(); err != nil {
@@ -93,7 +95,7 @@ func (s *Server) signIn(w http.ResponseWriter, r *http.Request) {
 		}
 		authenticated, err := correctPassword(user.Password, pw)
 		if err != nil {
-			LogError(r, fmt.Errorf("", err))
+			LogError(r, fmt.Errorf("verify password: %v", err))
 		}
 		if !authenticated {
 			http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
@@ -105,7 +107,7 @@ func (s *Server) signIn(w http.ResponseWriter, r *http.Request) {
 			LogError(r, err)
 			return
 		}
-		ttl, err := s.AuthService.SetAuth(r.Context(), token, userID)
+		ttl, err := s.AuthService.SetAuth(r.Context(), token, user.ID)
 		if err != nil {
 			status := http.StatusInternalServerError
 			http.Error(w, http.StatusText(status), status)

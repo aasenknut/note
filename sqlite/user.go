@@ -21,9 +21,9 @@ func (us *UserService) Create(ctx context.Context, username, password string) (i
 	if err != nil {
 		return 0, fmt.Errorf("begin transaction: %v", err)
 	}
-	userQuery := `INSERT INTO user (username, password) VALUES (?, ?)`
+	query := `INSERT INTO user (username, password) VALUES (?, ?)`
 
-	res, err := tx.ExecContext(ctx, userQuery, username, password)
+	res, err := tx.ExecContext(ctx, query, username, password)
 	if err != nil {
 		return 0, fmt.Errorf("create user: %s - %v", username, err)
 	}
@@ -38,6 +38,17 @@ func (us *UserService) GetByID(ctx context.Context, id int) (*note.User, error) 
 	return &note.User{}, fmt.Errorf("_ NOT IMPLEMENTED _")
 }
 
-func (us *UserService) GetByUsername(ctx context.Context, id int) (*note.User, error) {
-	return &note.User{}, fmt.Errorf("_ NOT IMPLEMENTED _")
+func (us *UserService) GetByUsername(ctx context.Context, username string) (*note.User, error) {
+	tx, err := us.db.BeginTx(ctx, nil)
+	defer tx.Rollback()
+	if err != nil {
+		return nil, fmt.Errorf("get user by username: %v", err)
+	}
+	query := `SELECT id, username, password FROM user WHERE username = ?`
+	row := tx.QueryRowContext(ctx, query, username)
+	var user note.User
+	if err := row.Scan(&user.ID, &user.Username, &user.Password); err != nil {
+		return nil, fmt.Errorf("get user by username: %v", err)
+	}
+	return &note.User{}, nil
 }

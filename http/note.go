@@ -17,9 +17,9 @@ const createRoute = "/note/create"
 
 func (s *Server) registerNoteRoutes() {
 	s.router.HandleFunc("/", s.handleHome)
-	s.router.HandleFunc(homeRoute, s.validateSession(http.HandlerFunc(s.handleHome)))
+	s.router.HandleFunc(homeRoute, s.handleHome)
 	s.router.HandleFunc(noteRoute, s.handleNoteView)
-	s.router.HandleFunc(createRoute, s.handleNoteCreate)
+	s.router.HandleFunc(createRoute, s.validateSession(s.handleNoteCreate))
 }
 
 func (s *Server) handleHome(w http.ResponseWriter, r *http.Request) {
