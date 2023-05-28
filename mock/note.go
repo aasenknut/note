@@ -20,7 +20,7 @@ func (n *NoteService) GetAllNotes(ctx context.Context) ([]*note.Note, error) {
 func (n *NoteService) GetNoteByID(ctx context.Context, id int) (*note.Note, error) {
 	return n.GetNoteByIDFn(ctx, id)
 }
-func (n *NoteService) CreateNote(ctx context.Context, note *note.Note) error {
+func (n *NoteService) CreateNote(ctx context.Context, note *note.Note) (*note.Note, error) {
 	return n.CreateNoteFn(ctx, note)
 }
 func (n *NoteService) DeleteNote(ctx context.Context, id int) error {
