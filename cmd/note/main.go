@@ -6,15 +6,19 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"runtime/pprof"
 
 	apphttp "github.com/aasenknut/note/http"
 	"github.com/aasenknut/note/redis"
 	"github.com/aasenknut/note/sqlite"
 	"github.com/pelletier/go-toml/v2"
+
+	_ "net/http/pprof"
 )
 
 var migrate = flag.Bool("migrate", false, "`true` to run migrations")
 var confPath = flag.String("config", "./conf.toml", "path to .toml config")
+var cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
 
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
@@ -26,6 +30,14 @@ func main() {
 		cancel()
 	}()
 	flag.Parse()
+	if *cpuprofile != "" {
+		f, err := os.Create(*cpuprofile)
+		if err != nil {
+			log.Fatal(err)
+		}
+		pprof.StartCPUProfile(f)
+		defer pprof.StopCPUProfile()
+	}
 	app := NewApp()
 	var err error
 	if app.Config, err = ParseConfigFile(*confPath); err != nil {

@@ -8,6 +8,9 @@ import (
 	"log"
 	"net"
 	"net/http"
+
+	_ "net/http/pprof"
+
 	"path/filepath"
 
 	"github.com/aasenknut/note"
