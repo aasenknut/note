@@ -16,13 +16,12 @@ const noteRoute = "/note/"
 const createRoute = "/note/create"
 
 func (s *Server) registerNoteRoutes() {
-	s.router.HandleFunc("/", s.handleHome)
-	s.router.HandleFunc(homeRoute, s.handleHome)
-	s.router.HandleFunc(noteRoute, s.handleNoteView)
-	s.router.HandleFunc(createRoute, s.validateSession(s.handleNoteCreate))
+	s.router.HandleFunc(homeRoute, s.Home)
+	s.router.HandleFunc(noteRoute, s.NoteView)
+	s.router.HandleFunc(createRoute, s.validateSession(s.NoteCreate))
 }
 
-func (s *Server) handleHome(w http.ResponseWriter, r *http.Request) {
+func (s *Server) Home(w http.ResponseWriter, r *http.Request) {
 	notes, err := s.NoteService.GetAllNotes(r.Context())
 	if err != nil {
 		status := http.StatusInternalServerError
@@ -39,7 +38,7 @@ func (s *Server) handleHome(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (s *Server) handleNoteView(w http.ResponseWriter, r *http.Request) {
+func (s *Server) NoteView(w http.ResponseWriter, r *http.Request) {
 	rawID := readID(r.URL.Path)
 	id, err := convertID(rawID)
 	if err != nil {
@@ -61,7 +60,7 @@ func (s *Server) handleNoteView(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (s *Server) handleNoteCreate(w http.ResponseWriter, r *http.Request) {
+func (s *Server) NoteCreate(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
 		err := r.ParseForm()
